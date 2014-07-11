@@ -10,7 +10,17 @@ Building CMTK in a Vagrant box
 
 The provided Vagrantfile allows to build cmtk in a CentOS 6 VM.
 
-Once in the Vagrant box, do the following to build CMTK:
+Starting the Vagrant box
+``` sh
+vagrant up
+```
+
+Connecting to the Vagrant box
+``` sh
+vagrant ssh
+```
+
+Building CMTK once in the Vagrant box
 ``` sh
 cd /vagrant
 rm -rf cmtk-* && ./build-locally.sh 2>&1 | tee buildlog-$(date +'%Y%m%d-%H:%M:%S')

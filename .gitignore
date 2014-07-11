@@ -1,0 +1,5 @@
+.vagrant/
+*.tgz
+*.gz
+*.bz2
+buildlog-*
