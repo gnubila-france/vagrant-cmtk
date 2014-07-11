@@ -74,6 +74,32 @@ fetch_file() {
   fi
 }
 
+# fix_rights $directory
+#
+# Recursively add write right to group and
+# execute/search for all on files where it is
+# defined at leat for one type of users
+fix_rights() {
+  if [ $# -ne 1 ]; then
+    echo 'fix_rights: Wrong numbers of parameters:'
+    echo 'fix_rights directory'
+    exit 1
+  fi
+
+  local directory="$1"
+  assert_is_set fix_rights directory
+
+  echo
+  echo "Fixing rights on $directory"
+  chmod -R ug=rwX,o=rX "$directory"
+  if [ $? -ne 0 ]; then
+    echo "Failure updating rights on $directory"
+    exit 1
+  else
+    echo 'Done.'
+  fi
+}
+
 # assert_is_set caller_name variable_name
 assert_is_set() {
   if [ $# -ne 2 ]; then
