@@ -39,14 +39,17 @@ case $OS_VERSION_MAJ in
     echo "Unmanaged OS version: $OS_VERSION_MAJ"
 esac
 
-# mrtrix deps
+# mrtrix dependencies
 yum install -y glibmm24-devel gtkmm24-devel gsl-devel
 
-# nifticlib deps
+# nifticlib dependencies
 yum install -y csh
 
-# camino-trackvis deps
+# camino-trackvis dependencies
 yum install -y lapack-devel
 
-# python dependenceis for https, bzip2
+# python dependencies for https, bzip2
 yum install -y openssl-devel bzip2-devel
+
+# MITK dependencies
+yum install -y libtiff-devel tcp_wrappers-devel
