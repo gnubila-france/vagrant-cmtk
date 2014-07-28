@@ -44,8 +44,18 @@ readonly MRTRIX_VER='0.2.11_2013-03-13'
 readonly MRTRIX_INSTALL_URL="$SOFTWARE_REPOSITORY/${MRTRIX_APP}-${MRTRIX_VER}.tar.bz2"
 readonly MRTRIX_INSTALL_URL_FILENAME="${MRTRIX_INSTALL_URL##*/}"
 
+readonly CMAKE_APP='cmake'
+readonly CMAKE_VER='3.0.0'
+readonly CMAKE_INSTALL_URL="$SOFTWARE_REPOSITORY/${CMAKE_APP}-${CMAKE_VER}.tar.gz"
+readonly CMAKE_INSTALL_URL_FILENAME="${CMAKE_INSTALL_URL##*/}"
+
+readonly QT_APP='qt-everywhere-opensource-src'
+readonly QT_VER='4.8.6'
+readonly QT_INSTALL_URL="$SOFTWARE_REPOSITORY/${QT_APP}-${QT_VER}.tar.gz"
+readonly QT_INSTALL_URL_FILENAME="${QT_INSTALL_URL##*/}"
+
 readonly GIBBS_APP='MITK'
-readonly GIBBS_VER='2014.03.00-linux64'
+readonly GIBBS_VER='2014.03.0-src'
 readonly GIBBS_INSTALL_URL="$SOFTWARE_REPOSITORY/${GIBBS_APP}-${GIBBS_VER}.tar.gz"
 readonly GIBBS_INSTALL_URL_FILENAME="${GIBBS_INSTALL_URL##*/}"
 
@@ -80,6 +90,12 @@ readonly INIT_SCRIPT="$BUILD_DIR/init.sh"
 
 # Camino trackvis
 [ -f "$CAMINO_TRACKVIS_INSTALL_URL_FILENAME" ] || fetch_file "$CAMINO_TRACKVIS_INSTALL_URL"
+
+# cmake
+[ -f "$CMAKE_INSTALL_URL_FILENAME" ] || fetch_file "$CMAKE_INSTALL_URL"
+
+# QT
+[ -f "$QT_INSTALL_URL_FILENAME" ] || fetch_file "$QT_INSTALL_URL"
 
 # Gibbs tracker
 [ -f "$GIBBS_INSTALL_URL_FILENAME" ] || fetch_file "$GIBBS_INSTALL_URL"
@@ -174,7 +190,40 @@ cd "$BUILD_DIR"
 # http://mitk.org/Download
 echo
 echo 'Installing Gibbs tracker'
+# Install cmake
+extract_tarball "$TEMP_DIR_PATH/$CMAKE_INSTALL_URL_FILENAME"
+cd "${CMAKE_INSTALL_URL_FILENAME%.tar.gz}"
+./bootstrap --prefix="$BUILD_DIR/cmake"
+make
+make install
+# Use our cmake install starting from now
+export PATH="$BUILD_DIR/cmake/bin:$PATH"
+cd "$BUILD_DIR"
+# Instal QT
+extract_tarball "$TEMP_DIR_PATH/$QT_INSTALL_URL_FILENAME"
+cd "${QT_INSTALL_URL_FILENAME%.tar.gz}"
+# XXX -static seems to prevent building webkit
+echo 'yes' | ./configure -prefix "$BUILD_DIR/qt" -opensource -webkit
+make
+make install
+# Use our qt starting from now
+export PATH="$BUILD_DIR/qt/bin:$PATH"
+export LD_LIBRARY_PATH="$BUILD_DIR/qt/lib:$LD_LIBRARY_PATH"
+cd "$BUILD_DIR"
+# Install MITK
+mkdir MITK-src
+cd MITK-src
 extract_tarball "$TEMP_DIR_PATH/$GIBBS_INSTALL_URL_FILENAME"
+cd "$BUILD_DIR"
+mkdir MITK-build
+cd MITK-build
+cmake ../MITK-src
+make
+# make install
+cd "$BUILD_DIR"
+# Clean directories
+rm -rf ../MITK-src
+rm -rf "${QT_INSTALL_URL_FILENAME%.tar.gz}"
 
 # Nipype and connectomemapper deps
 echo
@@ -261,6 +310,10 @@ if \$(assert_is_set cmtk-init-env FREESURFER_HOME) && \$(assert_is_set cmtk-init
   # Camino trackvis
   export CAMINO2TRK="\$CMTK_HOME/${CAMINO_TRACKVIS_INSTALL_URL_FILENAME%.tar.bz2}/bin"
   export PATH="\$CMTK_HOME/\$CAMINO2TRK:\$PATH"
+
+  # QT
+  PATH="\$CMTK_HOME/qt/bin:\$PATH"
+  export LD_LIBRARY_PATH="\$CMTK_HOME/qt/lib:\$LD_LIBRARY_PATH"
 
   # Gibbs
   export PATH="\$CMTK_HOME/${GIBBS_INSTALL_URL_FILENAME%.tar.gz}/bin:$PATH"
